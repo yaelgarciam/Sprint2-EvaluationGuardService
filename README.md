@@ -1,98 +1,100 @@
 # EvaluationGuard Assignment #3
 
-## Lo realizado en esta actividad
-Se trabajó sobre la base ubicada en `TutorBot/tutorbot-campus/backend/evaluator-service` para ejecutar la actividad de `EvaluationGuardService` descrita en el documento. En la validación de la práctica se confirmó el flujo previo a la llamada a Ollama con:
+## Work Completed
+This activity was developed on top of the base project located at `TutorBot/tutorbot-campus/backend/evaluator-service` to execute the `EvaluationGuardService` assignment described in the document. During validation, the flow before the Ollama call was confirmed with:
 
-- entidades `Skill`, `Topic` y `LearningPathEntity`
-- excepciones de dominio para `TopicNotFound`, `TopicInactive`, `SkillInactive` y `StudentNotEnrolled`
-- repositorios `TopicRepository` y `LearningPathRepository`
-- `EvaluationGuardService` inyectado como primera línea dentro de `EvaluationService`
-- `GlobalExceptionHandler` devolviendo `404` y `422`
-- pruebas unitarias pasando correctamente
+- entities `Skill`, `Topic`, and `LearningPathEntity`
+- domain exceptions for `TopicNotFound`, `TopicInactive`, `SkillInactive`, and `StudentNotEnrolled`
+- repositories `TopicRepository` and `LearningPathRepository`
+- `EvaluationGuardService` injected as the first line inside `EvaluationService`
+- `GlobalExceptionHandler` returning `404` and `422`
+- unit tests passing successfully
 
-Escenarios verificados durante la ejecución:
+Verified scenarios during execution:
 
-- `topicId=9999` devuelve `404 Not Found`
-- `topicId=16` devuelve `422 Unprocessable Entity`
-- `topicId=15` devuelve `422 Unprocessable Entity`
-- `studentId=STU999, topicId=1` devuelve `422 Unprocessable Entity`
-- `studentId=A00835001, topicId=1` devuelve `201 Created`
+- `topicId=9999` returns `404 Not Found`
+- `topicId=16` returns `422 Unprocessable Entity`
+- `topicId=15` returns `422 Unprocessable Entity`
+- `studentId=STU999, topicId=1` returns `422 Unprocessable Entity`
+- `studentId=A00835001, topicId=1` returns `201 Created`
 
-## Comandos necesarios para correr el código
+## Commands Required to Run the Project
 
-### 1. Levantar Oracle
+Run the following commands starting from the `Sprint_2_Web` folder.
+
+### 1. Start Oracle
 ```bash
 cd TutorBot/tutorbot-campus/infrastructure
 docker compose -f docker-compose-practice.yml up -d oracle-db
 ```
 
-### 2. Cargar los scripts base
+### 2. Load the Base Scripts
 ```bash
-docker cp /Users/yaelgarciam/Sprint_2_Web/TutorBot/tutorbot-campus/infrastructure/oracle/V1__init_schema.sql oracledb:/tmp/V1__init_schema.sql
-docker cp /Users/yaelgarciam/Sprint_2_Web/TutorBot/tutorbot-campus/infrastructure/oracle/V2__seed_data.sql oracledb:/tmp/V2__seed_data.sql
+docker cp TutorBot/tutorbot-campus/infrastructure/oracle/V1__init_schema.sql oracledb:/tmp/V1__init_schema.sql
+docker cp TutorBot/tutorbot-campus/infrastructure/oracle/V2__seed_data.sql oracledb:/tmp/V2__seed_data.sql
 docker exec oracledb bash -lc "printf '@/tmp/V1__init_schema.sql\nEXIT;\n' | /opt/oracle/product/21c/dbhomeXE/bin/sqlplus -s Adolfo/password@//localhost:1521/XEPDB1"
 docker exec oracledb bash -lc "printf '@/tmp/V2__seed_data.sql\nEXIT;\n' | /opt/oracle/product/21c/dbhomeXE/bin/sqlplus -s Adolfo/password@//localhost:1521/XEPDB1"
 ```
 
-### 3. Ejecutar pruebas
+### 3. Run the Tests
 ```bash
-cd /Users/yaelgarciam/Sprint_2_Web/TutorBot/tutorbot-campus/backend/evaluator-service
+cd TutorBot/tutorbot-campus/backend/evaluator-service
 mvn test
 ```
 
-### 4. Levantar el servicio
+### 4. Start the Service
 ```bash
-cd /Users/yaelgarciam/Sprint_2_Web/TutorBot/tutorbot-campus/backend/evaluator-service
+cd TutorBot/tutorbot-campus/backend/evaluator-service
 mvn spring-boot:run -Dspring-boot.run.profiles=practice
 ```
 
-### 4.1 Abrir la interfaz web
-Con el servicio levantado, abre:
+### 4.1 Open the Web Interface
+With the service running, open:
 
 ```text
 http://localhost:8082/
 ```
 
-### 4.2 Verificar salud del servicio
-La interfaz consulta `GET /actuator/health` para saber si el backend está disponible.
+### 4.2 Check Service Health
+The interface calls `GET /actuator/health` to verify whether the backend is available.
 
 ```bash
 curl -s http://localhost:8082/actuator/health
 ```
 
-Respuesta esperada:
+Expected response:
 
 ```json
 {"status":"UP"}
 ```
 
-Cuando ese endpoint responde `UP`, la tarjeta de la interfaz muestra `Disponible`. Si no responde o devuelve otro estado, la interfaz lo refleja como error o como un estado distinto.
+When that endpoint responds with `UP`, the interface shows `Available`. If it does not respond or returns another status, the interface reflects that state.
 
-### 5. Probar el endpoint principal
+### 5. Test the Main Endpoint
 ```bash
 curl -s -i -X POST http://localhost:8082/api/v1/evaluations \
   -H 'Content-Type: application/json' \
   -d '{"sessionId":"SESSION-ASSIGNMENT-201","studentId":"A00835001","questionText":"¿Qué es HTML?","studentAnswer":"Es un lenguaje de marcado.","correctAnswer":"HTML es un lenguaje de marcado.","maxScore":100,"topicId":1}'
 ```
 
-## Nota de ejecución
-Para poder correr la práctica con esta copia local del repositorio, se tuvo que alinear temporalmente la base en ejecución porque los scripts `V1__init_schema.sql` y `V2__seed_data.sql` de esta carpeta no incluyen `SKILLS`, `LEARNING_PATHS` ni las columnas `ACTIVE` y `SKILL_ID` en `TOPICS`, aunque el documento de la actividad sí las da por existentes. No se modificaron esos scripts dentro del repositorio.
+## Execution Note
+To run the practice with this local copy of the repository, the runtime database had to be temporarily aligned because the `V1__init_schema.sql` and `V2__seed_data.sql` scripts in this folder do not include `SKILLS`, `LEARNING_PATHS`, or the `ACTIVE` and `SKILL_ID` columns in `TOPICS`, even though the assignment document assumes they already exist. Those repository scripts were not modified.
 
-## Evidencias
+## Evidence
 
-### Pruebas unitarias
-![Pruebas unitarias](docs/evidencias/tests-success.png)
+### Unit Tests
+![Unit Tests](docs/evidencias/tests-success.png)
 
-### Servicio levantado
-![Servicio levantado](docs/evidencias/service-up.png)
+### Service Running
+![Service Running](docs/evidencias/service-up.png)
 
-### Interfaz web
-![Interfaz web](docs/evidencias/interface-web.png)
+### Web Interface
+![Web Interface](docs/evidencias/interface-web.png)
 
-### Respuestas del guard
-![Respuestas del guard](docs/evidencias/guard-responses.png)
+### Guard Responses
+![Guard Responses](docs/evidencias/guard-responses.png)
 
-## Autores
+## Authors
 José Emilio Inzunza García | A01644973
 
 Yael García Morelos | A01352461
