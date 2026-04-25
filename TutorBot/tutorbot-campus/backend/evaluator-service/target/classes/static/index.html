@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TutorBot Evaluator</title>
+    <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+    <div class="page-shell">
+        <header class="hero">
+            <div class="hero-copy">
+                <p class="eyebrow">TutorBot Campus</p>
+                <h1>Evaluator Service</h1>
+                <p class="hero-text">
+                    Una interfaz simple para enviar evaluaciones, revisar el estado del servicio
+                    y consultar resultados recientes sin depender de Postman.
+                </p>
+            </div>
+            <div class="hero-status">
+                <div class="status-card">
+                    <span class="status-label">Estado del servicio</span>
+                    <strong id="healthStatus">Verificando...</strong>
+                    <span id="healthDetail" class="status-detail">Consultando `/actuator/health`</span>
+                </div>
+            </div>
+        </header>
+
+        <main class="layout">
+            <section class="panel form-panel">
+                <div class="panel-heading">
+                    <div>
+                        <p class="section-tag">Nueva evaluación</p>
+                        <h2>Enviar respuesta</h2>
+                    </div>
+                    <button id="resetFormButton" class="ghost-button" type="button">Limpiar</button>
+                </div>
+
+                <div class="preset-bar">
+                    <button class="preset-button" type="button" data-preset="valid">Caso válido</button>
+                    <button class="preset-button" type="button" data-preset="topic404">Topic 404</button>
+                    <button class="preset-button" type="button" data-preset="topic422">Topic inactivo</button>
+                    <button class="preset-button" type="button" data-preset="skill422">Skill inactiva</button>
+                    <button class="preset-button" type="button" data-preset="student422">Sin inscripción</button>
+                    <button id="validAnswerButton" class="preset-button accent-button" type="button">Poner respuesta válida</button>
+                </div>
+
+                <form id="evaluationForm" class="evaluation-form">
+                    <div class="field-grid">
+                        <label>
+                            <span>Session ID</span>
+                            <input id="sessionId" name="sessionId" type="text" required>
+                        </label>
+                        <label>
+                            <span>Student ID</span>
+                            <input id="studentId" name="studentId" type="text" required>
+                        </label>
+                        <label>
+                            <span>Topic ID</span>
+                            <input id="topicId" name="topicId" type="number" min="1" required>
+                        </label>
+                        <label>
+                            <span>Max Score</span>
+                            <input id="maxScore" name="maxScore" type="number" min="1" value="100" required>
+                        </label>
+                    </div>
+
+                    <label>
+                        <span>Pregunta</span>
+                        <textarea id="questionText" name="questionText" rows="3" required></textarea>
+                    </label>
+
+                    <label>
+                        <span>Respuesta del estudiante</span>
+                        <textarea id="studentAnswer" name="studentAnswer" rows="4" required></textarea>
+                    </label>
+
+                    <label>
+                        <span>Respuesta correcta</span>
+                        <textarea id="correctAnswer" name="correctAnswer" rows="4" required></textarea>
+                    </label>
+
+                    <div class="form-actions">
+                        <button id="submitButton" class="primary-button" type="submit">Evaluar respuesta</button>
+                        <span id="submitHint" class="form-hint">
+                            Puedes usar "Poner respuesta válida" para copiar la respuesta correcta al campo del estudiante.
+                        </span>
+                    </div>
+                </form>
+            </section>
+
+            <aside class="sidebar">
+                <section class="panel response-panel">
+                    <div class="panel-heading">
+                        <div>
+                            <p class="section-tag">Respuesta</p>
+                            <h2>Resultado del request</h2>
+                        </div>
+                    </div>
+
+                    <div id="responseMeta" class="response-meta empty-state">
+                        Envía una evaluación o usa uno de los casos rápidos.
+                    </div>
+                    <pre id="responseBody" class="code-block">Sin resultados todavía.</pre>
+                </section>
+
+                <section class="panel list-panel">
+                    <div class="panel-heading">
+                        <div>
+                            <p class="section-tag">Historial</p>
+                            <h2>Evaluaciones recientes</h2>
+                        </div>
+                        <button id="refreshButton" class="ghost-button" type="button">Actualizar</button>
+                    </div>
+
+                    <div id="evaluationsList" class="evaluations-list empty-state">
+                        Cargando evaluaciones...
+                    </div>
+                </section>
+            </aside>
+        </main>
+    </div>
+
+    <script src="/app.js"></script>
+</body>
+</html>

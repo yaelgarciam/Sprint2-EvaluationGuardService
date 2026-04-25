@@ -1,0 +1,40 @@
+# ============================================================
+# TutorBot Campus — Practice Docker Compose
+# Only Oracle DB + Ollama — no RabbitMQ, MongoDB, Redis, Solr
+#
+# Usage:
+#   docker compose -f docker-compose-practice.yml up -d
+#
+# Then run evaluator-service locally with:
+#   cd backend/evaluator-service
+#   ./mvnw spring-boot:run -Dspring-boot.run.profiles=practice
+# ============================================================
+version: '3.9'
+
+services:
+  oracle-db:
+    image: gvenzl/oracle-xe:21-slim
+    container_name: oracledb
+    environment:
+      ORACLE_PASSWORD: password
+      APP_USER: Adolfo
+      APP_USER_PASSWORD: password
+    ports:
+      - "1522:1521"
+    mem_limit: 2g
+    healthcheck:
+      test: ["CMD", "healthcheck.sh"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  ollama:
+    image: ollama/ollama:latest
+    container_name: tutorbot-ollama
+    ports:
+      - '11434:11434'
+    volumes:
+      - ollama-data:/root/.ollama
+
+volumes:
+  ollama-data:
